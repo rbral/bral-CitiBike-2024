@@ -1,4 +1,4 @@
-package org.example;
+package bral.citibike;
 
 public class Main
 {
