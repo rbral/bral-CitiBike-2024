@@ -1,3 +1,5 @@
+package bral.citibike;
+
 import bral.citibike.CitiBikeService;
 import bral.citibike.CitiBikeServiceFactory;
 import bral.citibike.json.*;

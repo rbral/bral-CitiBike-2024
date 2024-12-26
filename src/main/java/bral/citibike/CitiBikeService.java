@@ -13,18 +13,9 @@ import retrofit2.http.Query;
 public interface CitiBikeService
 {
     @GET("/gbfs/en/station_information.json")
-    Single<StationObjects> getStationInformation(
-            /*@Query("station_id") String station_id,
-            @Query("name") String name,
-            @Query("lat") double lat,
-            @Query("lon") double lon,
-            @Query("capacity") int capacity*/
-    );
+    Single<StationObjects> getStationInformation();
 
     @GET("/gbfs/en/station_status.json")
-    Single<StatusObjects> getStationStatus(
-            /*@Query("station_id") String station_id,
-            @Query("num_bikes_available") int num_bikes_available,
-            @Query("num_docks_available") int num_docks_available*/
-    );
+    Single<StatusObjects> getStationStatus();
+
 }
