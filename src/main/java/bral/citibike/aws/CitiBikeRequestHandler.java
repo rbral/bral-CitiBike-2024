@@ -29,13 +29,14 @@ public class CitiBikeRequestHandler implements RequestHandler<APIGatewayProxyReq
         return new CitiBikeResponse(
                 request.from,
                 new StationInfo(startStation.lat, startStation.lon, startStation.name, startStation.station_id),
-                new StationInfo(endStation.lat, endStation.lon, endStation.name, endStation.station_id ),
+                new StationInfo(endStation.lat, endStation.lon, endStation.name, endStation.station_id),
                 request.to
         );
     }
 
 
     record Coordinates(double lat, double lon) {}
+
     record CitiBikeRequest(
             Coordinates from,
             Coordinates to
@@ -45,8 +46,10 @@ public class CitiBikeRequestHandler implements RequestHandler<APIGatewayProxyReq
             double lat,
             double lon,
             String name,
-            String station_id
+            //CHECKSTYLE:OFF
+            String station_id //CHECKSTYLE:ON
     ) { }
+
     record CitiBikeResponse(
             Coordinates from,
             StationInfo start,

@@ -1,10 +1,8 @@
 package bral.citibike.aws;
-import bral.citibike.json.*;
+
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.Test;
-import bral.citibike.aws.CitiBikeRequestHandler;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
