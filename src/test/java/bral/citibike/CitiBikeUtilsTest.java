@@ -21,8 +21,7 @@ public class CitiBikeUtilsTest
         StatusObject status = utils.findStationStatus(stationId);
 
         // then
-        assertNotNull(status);
-        assertNotNull(status.station_id);
+        assertEquals(stationId, status.station_id);
     }
 
     @Test
@@ -36,12 +35,13 @@ public class CitiBikeUtilsTest
 
         double lat = stationsResponse.data.stations.get(0).lat;
         double lon = stationsResponse.data.stations.get(0).lon;
+        String stationId = stationsResponse.data.stations.get(0).station_id;
 
         // when
         StationObject station = utils.closestStationWithBikes(lat, lon);
 
         // then
-        assertNotNull(station);
+        assertEquals(stationId, station.station_id);
     }
 
     @Test
@@ -55,12 +55,13 @@ public class CitiBikeUtilsTest
 
         double lat = stationsResponse.data.stations.get(0).lat;
         double lon = stationsResponse.data.stations.get(0).lon;
+        String stationId = stationsResponse.data.stations.get(0).station_id;
 
         // when
         StationObject station = utils.closestStationWithSlots(lat, lon);
 
         // then
-        assertNotNull(station);
+        assertEquals(stationId, station.station_id);
     }
 
 }

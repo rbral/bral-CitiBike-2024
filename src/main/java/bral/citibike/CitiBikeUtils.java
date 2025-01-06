@@ -19,15 +19,14 @@ public class CitiBikeUtils
     // Find the Status of a Station given the Station’s station_id
     public StatusObject findStationStatus(String stationId)
     {
-        StatusObject result = null;
         for (StatusObject status : statuses.data.stations)
         {
             if (status.station_id.equals(stationId))
             {
-                result = status;
+                return status;
             }
         }
-        return result;
+        return null;
     }
 
     // Find the closest station (with available bikes) to a given location.

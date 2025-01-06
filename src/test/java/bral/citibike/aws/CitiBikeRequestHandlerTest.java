@@ -3,42 +3,42 @@ package bral.citibike.aws;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Scanner;
 
 public class CitiBikeRequestHandlerTest
 {
     @Test
-    public void handleRequest()
+    public void handleRequest() throws IOException
     {
         // given
-        Gson gson = new Gson();
+        String requestJson = new String(Files.readAllBytes(Paths.get("request.json")));
         APIGatewayProxyRequestEvent event = new APIGatewayProxyRequestEvent();
-        String input = """
-                {        
-                  "from": {
-                    "lat": 40.8211,
-                    "lon": -73.9359
-                  },
-                  "to": {
-                    "lat": 40.7190,
-                    "lon": -73.9585
-                  }
-                }           
-                """;
-        event.setBody(input);
+        event.setBody(requestJson);
 
         // when
         CitiBikeRequestHandler handler = new CitiBikeRequestHandler();
-        CitiBikeRequestHandler.CitiBikeResponse response = handler.handleRequest(event, null);
+        CitiBikeRequestHandler.CitiBikeResponse actual = handler.handleRequest(event, null);
 
         // then
-        assertNotNull(response);
-        assertNotNull(response.start());
-        assertNotNull(response.end());
-        assertEquals(40.8211, response.from().lat());
-        assertEquals(-73.9359, response.from().lon());
-        assertEquals(40.7190, response.to().lat());
-        assertEquals(-73.9585, response.to().lon());
+        assertNotNull(actual);
+        assertNotNull(actual.start());
+        assertNotNull(actual.end());
+
+        Gson gson = new Gson();
+        String expectedResponseJson = new String(Files.readAllBytes(Paths.get("response.json")));
+        CitiBikeRequestHandler.CitiBikeResponse expected = gson.fromJson(expectedResponseJson,
+                CitiBikeRequestHandler.CitiBikeResponse.class);
+
+        assertEquals(expected.from().lat(), actual.from().lat());
+        assertEquals(expected.from().lon(), actual.from().lon());
+        assertEquals(expected.to().lat(), actual.to().lat());
+        assertEquals(expected.to().lon(), actual.to().lon());
     }
 }
