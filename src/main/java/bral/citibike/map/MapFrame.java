@@ -3,6 +3,8 @@ package bral.citibike.map;
 import javax.swing.*;
 import javax.swing.event.MouseInputListener;
 
+import bral.citibike.CitiBikeService;
+import bral.citibike.CitiBikeServiceFactory;
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.OSMTileFactoryInfo;
 import org.jxmapviewer.input.*;
@@ -74,6 +76,9 @@ public class MapFrame extends JFrame
             JOptionPane.showMessageDialog(this, "Please select both From and To points.");
             return;
         }
+
+        CitiBikeService service = new CitiBikeServiceFactory().getService();
+
 
         startStation = new GeoPosition(40.775, -73.950); // Simulated start station
         endStation = new GeoPosition(40.720, -73.960);   // Simulated end station
