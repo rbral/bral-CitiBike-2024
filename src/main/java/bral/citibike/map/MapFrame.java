@@ -40,6 +40,7 @@ public class MapFrame extends JFrame
     private GeoPosition endStationPosition;
     private List<GeoPosition> route;
     private Set<Waypoint> waypoints;
+
     public MapFrame()
     {
         initializeMapViewer();
@@ -90,8 +91,10 @@ public class MapFrame extends JFrame
 
         utils = new CitiBikeUtils(stationsResponse, statusesResponse);
 
-        StationObject startStation = utils.closestStationWithBikes(fromUserPosition.getLatitude(), fromUserPosition.getLongitude());
-        StationObject endStation = utils.closestStationWithSlots(toUserPosition.getLatitude(), toUserPosition.getLongitude());
+        StationObject startStation = utils.closestStationWithBikes(
+                fromUserPosition.getLatitude(), fromUserPosition.getLongitude());
+        StationObject endStation = utils.closestStationWithSlots(
+                toUserPosition.getLatitude(), toUserPosition.getLongitude());
 
         startStationPosition = new GeoPosition(startStation.lat, startStation.lon); // Simulated start station
         endStationPosition = new GeoPosition(endStation.lat, endStation.lon);   // Simulated end station
