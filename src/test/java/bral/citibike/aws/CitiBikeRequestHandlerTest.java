@@ -21,9 +21,9 @@ public class CitiBikeRequestHandlerTest
         String requestJson = new String(Files.readAllBytes(Paths.get("request.json")));
         APIGatewayProxyRequestEvent event = new APIGatewayProxyRequestEvent();
         event.setBody(requestJson);
+        CitiBikeRequestHandler handler = new CitiBikeRequestHandler();
 
         // when
-        CitiBikeRequestHandler handler = new CitiBikeRequestHandler();
         CitiBikeRequestHandler.CitiBikeResponse actual = handler.handleRequest(event, null);
 
         // then

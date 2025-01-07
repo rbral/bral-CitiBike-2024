@@ -33,22 +33,25 @@ public class CitiBikeUtilsTest
     public void closestStationWithBikes() throws IOException
     {
         // given
+        Gson gson = new Gson();
         String jsonStation = new String(Files.readAllBytes(Paths.get("stations_mock.json")));
-        StationObjects stationsResponse = new Gson().fromJson(jsonStation, StationObjects.class);
+        StationObjects stationsResponse =gson.fromJson(jsonStation, StationObjects.class);
         String jsonStatus = new String(Files.readAllBytes(Paths.get("statuses_mock.json")));
-        StatusObjects statusesResponse = new Gson().fromJson(jsonStatus, StatusObjects.class);
+        StatusObjects statusesResponse = gson.fromJson(jsonStatus, StatusObjects.class);
 
         CitiBikeUtils utils = new CitiBikeUtils(stationsResponse, statusesResponse);
 
-        double lat = stationsResponse.data.stations.get(3).lat;
-        double lon = stationsResponse.data.stations.get(3).lon;
-        String stationId = stationsResponse.data.stations.get(3).station_id;
+        StationObject station = stationsResponse.data.stations.get(3);
+
+        double lat = station.lat;
+        double lon = station.lon;
+        String stationId = station.station_id;
 
         // when
-        StationObject station = utils.closestStationWithBikes(lat, lon);
+        StationObject closestStation = utils.closestStationWithBikes(lat, lon);
 
         // then
-        assertEquals(stationId, station.station_id);
+        assertEquals(stationId, closestStation.station_id);
     }
 
     @Test
@@ -60,15 +63,16 @@ public class CitiBikeUtilsTest
         StatusObjects statusesResponse = service.getStationStatus().blockingGet();
         CitiBikeUtils utils = new CitiBikeUtils(stationsResponse, statusesResponse);
 
-        double lat = stationsResponse.data.stations.get(3).lat;
-        double lon = stationsResponse.data.stations.get(3).lon;
-        String stationId = stationsResponse.data.stations.get(3).station_id;
+        StationObject station = stationsResponse.data.stations.get(3);
+        double lat = station.lat;
+        double lon = station.lon;
+        String stationId = station.station_id;
 
         // when
-        StationObject station = utils.closestStationWithSlots(lat, lon);
+        StationObject closestStation = utils.closestStationWithSlots(lat, lon);
 
         // then
-        assertEquals(stationId, station.station_id);
+        assertEquals(stationId, closestStation.station_id);
     }
 
 }
