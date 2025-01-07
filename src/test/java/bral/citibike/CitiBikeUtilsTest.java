@@ -35,7 +35,7 @@ public class CitiBikeUtilsTest
         // given
         Gson gson = new Gson();
         String jsonStation = new String(Files.readAllBytes(Paths.get("stations_mock.json")));
-        StationObjects stationsResponse =gson.fromJson(jsonStation, StationObjects.class);
+        StationObjects stationsResponse = gson.fromJson(jsonStation, StationObjects.class);
         String jsonStatus = new String(Files.readAllBytes(Paths.get("statuses_mock.json")));
         StatusObjects statusesResponse = gson.fromJson(jsonStatus, StatusObjects.class);
 
