@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 
 public class CitiBikeUtilsTest
 {
+
     @Test
     public void findStationStatus()
     {
