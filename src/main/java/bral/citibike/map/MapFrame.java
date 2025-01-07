@@ -3,8 +3,11 @@ package bral.citibike.map;
 import javax.swing.*;
 import javax.swing.event.MouseInputListener;
 
-import bral.citibike.CitiBikeService;
-import bral.citibike.CitiBikeServiceFactory;
+import bral.citibike.*;
+
+import bral.citibike.json.StationObject;
+import bral.citibike.json.StationObjects;
+import bral.citibike.json.StatusObjects;
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.OSMTileFactoryInfo;
 import org.jxmapviewer.input.*;
@@ -21,22 +24,26 @@ import java.util.Set;
 
 public class MapFrame extends JFrame
 {
-    private JXMapViewer mapViewer;
     private JPanel mainPanel;
     private JPanel controlPanel;
     private JButton mapButton;
     private JButton clearButton;
     private JTextField fromField;
     private JTextField toField;
-    private GeoPosition from;
-    private GeoPosition to;
-    private GeoPosition startStation;
-    private GeoPosition endStation;
+    private JXMapViewer mapViewer;
+    private StationObjects stationsResponse;
+    private StatusObjects statusesResponse;
+    private CitiBikeUtils utils;
+    private GeoPosition fromUserPosition;
+    private GeoPosition toUserPosition;
+    private GeoPosition startStationPosition;
+    private GeoPosition endStationPosition;
     private List<GeoPosition> route;
     private Set<Waypoint> waypoints;
     public MapFrame()
     {
         initializeMapViewer();
+
         // Display the viewer in a JFrame
         setTitle("CitiBike NYC");
         setSize(850, 900);
@@ -71,25 +78,31 @@ public class MapFrame extends JFrame
 
     private void mapRoute()
     {
-        if (from == null || to == null)
+        if (fromUserPosition == null || toUserPosition == null)
         {
             JOptionPane.showMessageDialog(this, "Please select both From and To points.");
             return;
         }
 
         CitiBikeService service = new CitiBikeServiceFactory().getService();
+        stationsResponse = service.getStationInformation().blockingGet();
+        statusesResponse = service.getStationStatus().blockingGet();
 
+        utils = new CitiBikeUtils(stationsResponse, statusesResponse);
 
-        startStation = new GeoPosition(40.775, -73.950); // Simulated start station
-        endStation = new GeoPosition(40.720, -73.960);   // Simulated end station
+        StationObject startStation = utils.closestStationWithBikes(fromUserPosition.getLatitude(), fromUserPosition.getLongitude());
+        StationObject endStation = utils.closestStationWithSlots(toUserPosition.getLatitude(), toUserPosition.getLongitude());
 
-        route = List.of(from, startStation, endStation, to);
+        startStationPosition = new GeoPosition(startStation.lat, startStation.lon); // Simulated start station
+        endStationPosition = new GeoPosition(endStation.lat, endStation.lon);   // Simulated end station
+
+        route = List.of(fromUserPosition, startStationPosition, endStationPosition, toUserPosition);
 
         waypoints = Set.of(
-                new DefaultWaypoint(from),
-                new DefaultWaypoint(startStation),
-                new DefaultWaypoint(endStation),
-                new DefaultWaypoint(to)
+                new DefaultWaypoint(fromUserPosition),
+                new DefaultWaypoint(startStationPosition),
+                new DefaultWaypoint(endStationPosition),
+                new DefaultWaypoint(toUserPosition)
         );
         updateMap();
     }
@@ -115,7 +128,7 @@ public class MapFrame extends JFrame
 
 
         mapViewer.zoomToBestFit(
-                Set.of(from, startStation, endStation, to),
+                Set.of(fromUserPosition, startStationPosition, endStationPosition, toUserPosition),
                 1.0
         );
     }
@@ -123,15 +136,21 @@ public class MapFrame extends JFrame
     private void clearMap()
     {
         // clear all data
-        from = null;
-        to = null;
+        fromUserPosition = null;
+        toUserPosition = null;
+        startStationPosition = null;
+        endStationPosition = null;
         fromField.setText("");
         toField.setText("");
+
+        // clear the route and waypoints
+        route = null;
         waypoints = Set.of();
-        route.clear();
 
         // Clear Painters
         mapViewer.setOverlayPainter(null);
+
+        mapViewer.repaint();
     }
 
     public void initializeMapViewer()
@@ -171,13 +190,13 @@ public class MapFrame extends JFrame
                 Point2D.Double point = new Point2D.Double(x, y);
                 GeoPosition position = mapViewer.convertPointToGeoPosition(point);
 
-                if (from == null)
+                if (fromUserPosition == null)
                 {
-                    from = position;
+                    fromUserPosition = position;
                     fromField.setText(position.getLatitude() + ", " + position.getLongitude());
-                } else if (to == null)
+                } else if (toUserPosition == null)
                 {
-                    to = position;
+                    toUserPosition = position;
                     toField.setText(position.getLatitude() + ", " + position.getLongitude());
                 }
             }
