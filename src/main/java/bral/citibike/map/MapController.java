@@ -49,7 +49,8 @@ public class MapController
         view.startStationPosition = new GeoPosition(startStation.lat, startStation.lon); // Simulated start station
         view.endStationPosition = new GeoPosition(endStation.lat, endStation.lon);   // Simulated end station
 
-        view.route = List.of(view.fromUserPosition, view.startStationPosition, view.endStationPosition, view.toUserPosition);
+        view.route = List.of(view.fromUserPosition, view.startStationPosition,
+                view.endStationPosition, view.toUserPosition);
 
         view.waypoints = Set.of(
                 new DefaultWaypoint(view.fromUserPosition),
