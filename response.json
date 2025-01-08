@@ -1,0 +1,31 @@
+{
+  "from":
+  {
+    "lat": 40.8211,
+    "lon": -73.9359
+  },
+
+  "start":
+  {
+    "lat": 40.821111,
+    "lon": -73.935971,
+    "name": "Lenox Ave & W 146 St",
+    "station_id": "b0bac4ef-bb57-4598-a433-75c281170d5b"
+  },
+
+  "end":
+  {
+    "lat": 40.7190095,
+    "lon": -73.95852515,
+    "name": "Berry St & N 8 St",
+    "station_id": "66dd01c5-0aca-11e7-82f6-3863bb44ef7c"
+  },
+
+  "to":
+  {
+    "lat": 40.719,
+    "lon": -73.9585
+  }
+
+}
+
