@@ -12,6 +12,8 @@ import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.Duration;
@@ -38,6 +40,7 @@ public class StationsCache
     }
     public StationObjects getStations()
     {
+        System.out.println("Attempting to fetch stations...");
         if (stationObjects != null)
         {
             // Case 1: If stations != null and lastModified time is LESS than 1 hour
@@ -47,6 +50,15 @@ public class StationsCache
             } else {
                 // Case 2: If stations != null and lastModified time is GREATER than 1 hour
                 stationObjects = service.getStationInformation().blockingGet();
+
+                // save it to a file
+                /*String json = gson.toJson(stationObjects);
+                try (FileWriter writer = new FileWriter(STATIONS_KEY)) {
+                    writer.write(json);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }*/
+
                 lastModified = Instant.now();
                 uploadToS3(stationObjects);
                 return stationObjects;
