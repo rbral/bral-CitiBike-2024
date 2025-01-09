@@ -12,8 +12,6 @@ import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.Duration;
@@ -21,9 +19,8 @@ import java.time.Instant;
 
 public class StationsCache
 {
-    private final String BUCKET_NAME = "bral.citibike.bbnn";
-    private static final String STATIONS_KEY = "stations.json";
-    private static final long CACHE_EXPIRY_HOURS = 1;
+    private final String bucketName = "bral.citibike.bbnn";
+    private static final String stationsKey = "stations.json";
 
     private S3Client s3Client;
     private CitiBikeService service;
@@ -32,12 +29,14 @@ public class StationsCache
     private StationObjects stationObjects;
     private Instant lastModified;
 
+
     public StationsCache(S3Client s3Client)
     {
         this.s3Client = s3Client;
         service = new CitiBikeServiceFactory().getService();
         this.gson = new Gson();
     }
+
     public StationObjects getStations()
     {
         System.out.println("Attempting to fetch stations...");
@@ -91,8 +90,8 @@ public class StationsCache
                 .build();
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(BUCKET_NAME)
-                .key(STATIONS_KEY)
+                .bucket(bucketName)
+                .key(stationsKey)
                 .build();
 
         s3Client.putObject(putObjectRequest, RequestBody.fromString(content));
@@ -104,8 +103,8 @@ public class StationsCache
 
         GetObjectRequest getObjectRequest = GetObjectRequest
                 .builder()
-                .bucket(BUCKET_NAME)
-                .key(STATIONS_KEY)
+                .bucket(bucketName)
+                .key(stationsKey)
                 .build();
 
         InputStream in = s3Client.getObject(getObjectRequest);
@@ -118,8 +117,8 @@ public class StationsCache
     private boolean s3LastModifiedOverAnHour()
     {
         HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
-                .bucket(BUCKET_NAME)
-                .key(STATIONS_KEY)
+                .bucket(bucketName)
+                .key(stationsKey)
                 .build();
 
         try {
