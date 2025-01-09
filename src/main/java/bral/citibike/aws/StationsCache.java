@@ -83,6 +83,7 @@ public class StationsCache
 
     private void uploadToS3(StationObjects stationObjects)
     {
+        try {
         String content = gson.toJson(stationObjects);
         Region region = Region.US_EAST_2;
         s3Client = S3Client.builder()
@@ -94,7 +95,10 @@ public class StationsCache
                 .key(stationsKey)
                 .build();
 
-        s3Client.putObject(putObjectRequest, RequestBody.fromString(content));
+            s3Client.putObject(putObjectRequest, RequestBody.fromString(content));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private StationObjects readFromS3()

@@ -12,8 +12,6 @@ import java.io.IOException;
 public class Generate
 {
     public static void main(String[] args) {
-        System.out.println("Starting the process to generate stations.json...");
-
         CitiBikeService service = new CitiBikeServiceFactory().getService();
         StationObjects stationsResponse = service.getStationInformation().blockingGet();
 
