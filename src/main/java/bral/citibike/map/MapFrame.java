@@ -24,25 +24,25 @@ import java.util.Set;
 
 public class MapFrame extends JFrame
 {
+    private MapController controller;
     private JPanel mainPanel;
     private JPanel controlPanel;
     private JButton mapButton;
     private JButton clearButton;
-    private JTextField fromField;
-    private JTextField toField;
-    private JXMapViewer mapViewer;
-    private StationObjects stationsResponse;
-    private StatusObjects statusesResponse;
-    private CitiBikeUtils utils;
-    private GeoPosition fromUserPosition;
-    private GeoPosition toUserPosition;
-    private GeoPosition startStationPosition;
-    private GeoPosition endStationPosition;
-    private List<GeoPosition> route;
-    private Set<Waypoint> waypoints;
+    JTextField fromField;
+    JTextField toField;
+    JXMapViewer mapViewer;
+
+    GeoPosition fromUserPosition;
+    GeoPosition toUserPosition;
+    GeoPosition startStationPosition;
+    GeoPosition endStationPosition;
+    List<GeoPosition> route;
+    Set<Waypoint> waypoints;
 
     public MapFrame()
     {
+        controller = new MapController(this);
         initializeMapViewer();
 
         // Display the viewer in a JFrame
@@ -73,44 +73,11 @@ public class MapFrame extends JFrame
         mainPanel.add(controlPanel, BorderLayout.SOUTH);
 
         // button actions
-        mapButton.addActionListener(e -> mapRoute());
-        clearButton.addActionListener(e -> clearMap());
+        mapButton.addActionListener(e -> controller.mapRoute());
+        clearButton.addActionListener(e -> controller.clearMap());
     }
 
-    private void mapRoute()
-    {
-        if (fromUserPosition == null || toUserPosition == null)
-        {
-            JOptionPane.showMessageDialog(this, "Please select both From and To points.");
-            return;
-        }
-
-        CitiBikeService service = new CitiBikeServiceFactory().getService();
-        stationsResponse = service.getStationInformation().blockingGet();
-        statusesResponse = service.getStationStatus().blockingGet();
-
-        utils = new CitiBikeUtils(stationsResponse, statusesResponse);
-
-        StationObject startStation = utils.closestStationWithBikes(
-                fromUserPosition.getLatitude(), fromUserPosition.getLongitude());
-        StationObject endStation = utils.closestStationWithSlots(
-                toUserPosition.getLatitude(), toUserPosition.getLongitude());
-
-        startStationPosition = new GeoPosition(startStation.lat, startStation.lon); // Simulated start station
-        endStationPosition = new GeoPosition(endStation.lat, endStation.lon);   // Simulated end station
-
-        route = List.of(fromUserPosition, startStationPosition, endStationPosition, toUserPosition);
-
-        waypoints = Set.of(
-                new DefaultWaypoint(fromUserPosition),
-                new DefaultWaypoint(startStationPosition),
-                new DefaultWaypoint(endStationPosition),
-                new DefaultWaypoint(toUserPosition)
-        );
-        updateMap();
-    }
-
-    private void updateMap()
+    public void updateMap()
     {
 
         // Waypoint Painter
@@ -134,26 +101,6 @@ public class MapFrame extends JFrame
                 Set.of(fromUserPosition, startStationPosition, endStationPosition, toUserPosition),
                 1.0
         );
-    }
-
-    private void clearMap()
-    {
-        // clear all data
-        fromUserPosition = null;
-        toUserPosition = null;
-        startStationPosition = null;
-        endStationPosition = null;
-        fromField.setText("");
-        toField.setText("");
-
-        // clear the route and waypoints
-        route = null;
-        waypoints = Set.of();
-
-        // Clear Painters
-        mapViewer.setOverlayPainter(null);
-
-        mapViewer.repaint();
     }
 
     public void initializeMapViewer()
