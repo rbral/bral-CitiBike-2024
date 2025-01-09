@@ -37,8 +37,10 @@ public class MapController
         }
 
         CitiBikeRequestHandler.CitiBikeRequest request = new CitiBikeRequestHandler.CitiBikeRequest(
-                new CitiBikeRequestHandler.Coordinates(view.fromUserPosition.getLatitude(), view.fromUserPosition.getLongitude()),
-                new CitiBikeRequestHandler.Coordinates(view.toUserPosition.getLatitude(), view.toUserPosition.getLongitude())
+                new CitiBikeRequestHandler.Coordinates(view.fromUserPosition.getLatitude(),
+                        view.fromUserPosition.getLongitude()),
+                new CitiBikeRequestHandler.Coordinates(view.toUserPosition.getLatitude(),
+                        view.toUserPosition.getLongitude())
         );
 
         Gson gson = new Gson();
