@@ -1,6 +1,6 @@
 package bral.citibike.aws;
 
-import bral.citibike.json.StationObjects;
+import bral.citibike.*;
 import bral.citibike.json.StatusObjects;
 import io.reactivex.rxjava3.core.Single;
 import retrofit2.http.Body;
@@ -14,9 +14,6 @@ import retrofit2.http.POST;
 public interface LambdaService
 {
     @POST("/")
-    Single<StationObjects> getStationInformation(@Body Object request);
-
-    @POST("/")
-    Single<StatusObjects> getStationStatus(@Body Object request);
+    Single<CitiBikeRequestHandler.CitiBikeResponse> callLambda(@Body CitiBikeRequestHandler.CitiBikeRequest request);
 
 }

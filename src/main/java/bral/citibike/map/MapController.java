@@ -1,11 +1,10 @@
 package bral.citibike.map;
 
 import bral.citibike.CitiBikeService;
-import bral.citibike.CitiBikeServiceFactory;
 import bral.citibike.CitiBikeUtils;
-import bral.citibike.json.StationObject;
-import bral.citibike.json.StationObjects;
-import bral.citibike.json.StatusObjects;
+import bral.citibike.aws.*;
+import bral.citibike.json.*;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.jxmapviewer.viewer.DefaultWaypoint;
 import org.jxmapviewer.viewer.GeoPosition;
 
@@ -17,7 +16,8 @@ public class MapController
 {
     private MapFrame view;
 
-    private CitiBikeService service;
+    //private CitiBikeService cityBikeService;
+    private LambdaService lambdaService;
     private StationObjects stationsResponse;
     private StatusObjects statusesResponse;
     private CitiBikeUtils utils;
@@ -25,6 +25,7 @@ public class MapController
     public MapController(MapFrame view)
     {
         this.view = view;
+        this.lambdaService = new LambdaServiceFactory().getService();
     }
 
     public void mapRoute()
@@ -35,11 +36,23 @@ public class MapController
             return;
         }
 
-        service = new CitiBikeServiceFactory().getService();
-        stationsResponse = service.getStationInformation().blockingGet();
-        statusesResponse = service.getStationStatus().blockingGet();
+        CitiBikeRequestHandler.CitiBikeRequest request = new CitiBikeRequestHandler.CitiBikeRequest(
+                new CitiBikeRequestHandler.Coordinates(view.fromUserPosition.getLatitude(), view.fromUserPosition.getLongitude()),
+                new CitiBikeRequestHandler.Coordinates(view.toUserPosition.getLatitude(), view.toUserPosition.getLongitude())
+        );
 
-        utils = new CitiBikeUtils(stationsResponse, statusesResponse);
+        lambdaService.callLambda(request)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.single())
+                .subscribe(response ->
+                {
+                    // Handle successful response
+                    processLambdaResponse(response);
+                }, error -> error.printStackTrace());
+
+        //cityBikeService = new CitiBikeServiceFactory().getService();
+
+        /*utils = new CitiBikeUtils(stationsResponse, statusesResponse);
 
         StationObject startStation = utils.closestStationWithBikes(
                 view.fromUserPosition.getLatitude(), view.fromUserPosition.getLongitude());
@@ -58,7 +71,29 @@ public class MapController
                 new DefaultWaypoint(view.endStationPosition),
                 new DefaultWaypoint(view.toUserPosition)
         );
-        view.updateMap();
+        view.updateMap();*/
+    }
+
+    private void processLambdaResponse(CitiBikeRequestHandler.CitiBikeResponse response) {
+        SwingUtilities.invokeLater(() -> {
+            // Process response to update the UI
+            view.startStationPosition = new GeoPosition(
+                    response.start().lat(), response.start().lon());
+            view.endStationPosition = new GeoPosition(
+                    response.end().lat(), response.end().lon());
+
+            view.route = List.of(view.fromUserPosition, view.startStationPosition,
+                    view.endStationPosition, view.toUserPosition);
+
+            view.waypoints = Set.of(
+                    new DefaultWaypoint(view.fromUserPosition),
+                    new DefaultWaypoint(view.startStationPosition),
+                    new DefaultWaypoint(view.endStationPosition),
+                    new DefaultWaypoint(view.toUserPosition)
+            );
+
+            view.updateMap();
+        });
     }
 
     public void clearMap()

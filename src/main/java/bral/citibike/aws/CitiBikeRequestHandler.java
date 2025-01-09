@@ -54,14 +54,14 @@ public class CitiBikeRequestHandler implements RequestHandler<APIGatewayProxyReq
     }
 
 
-    record Coordinates(double lat, double lon) {}
+    public record Coordinates(double lat, double lon) {}
 
-    record CitiBikeRequest(
+    public record CitiBikeRequest(
             Coordinates from,
             Coordinates to
     ) { }
 
-    record StationInfo(
+    public record StationInfo(
             double lat,
             double lon,
             String name,
@@ -69,7 +69,7 @@ public class CitiBikeRequestHandler implements RequestHandler<APIGatewayProxyReq
             String station_id //CHECKSTYLE:ON
     ) { }
 
-    record CitiBikeResponse(
+    public record CitiBikeResponse(
             Coordinates from,
             StationInfo start,
             StationInfo end,
