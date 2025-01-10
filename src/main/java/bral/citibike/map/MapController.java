@@ -46,13 +46,6 @@ public class MapController
         Gson gson = new Gson();
         String json = gson.toJson(request);
 
-        // Save it to a file
-        try (FileWriter writer = new FileWriter("stations.json")) {
-            writer.write(json);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         lambdaService.callLambda(request)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.single())

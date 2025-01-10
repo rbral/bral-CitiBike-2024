@@ -15,16 +15,17 @@ public class CitiBikeRequestHandler implements RequestHandler<APIGatewayProxyReq
         CitiBikeRequestHandler.CitiBikeResponse> {
 
     private final S3Client s3Client;
+    private final CitiBikeService service;
     private final StationsCache stationsCache;
 
     public CitiBikeRequestHandler()
     {
         // Initialize the s3 client
-        //s3Client = S3Client.create();
         s3Client = S3Client.builder()
-                .region(Region.US_EAST_2) // Specify your AWS region
+                .region(Region.US_EAST_2)
                 .build();
-        this.stationsCache = new StationsCache(s3Client);
+        service = new CitiBikeServiceFactory().getService();
+        this.stationsCache = new StationsCache(s3Client, service);
     }
 
     @Override
@@ -33,11 +34,7 @@ public class CitiBikeRequestHandler implements RequestHandler<APIGatewayProxyReq
         Gson gson = new Gson();
         CitiBikeRequest request = gson.fromJson(body, CitiBikeRequest.class);
 
-
-        CitiBikeService service = new CitiBikeServiceFactory().getService();
-        //StationObjects stations = service.getStationInformation().blockingGet();
         StatusObjects statuses = service.getStationStatus().blockingGet();
-        // Use StationsCache for station information
         StationObjects stations = stationsCache.getStations();
 
         CitiBikeUtils utils = new CitiBikeUtils(stations, statuses);

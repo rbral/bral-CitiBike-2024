@@ -19,9 +19,8 @@ import java.time.Instant;
 
 public class StationsCache
 {
-    private final String bucketName = "bral.citibike.bbnn";
-    private static final String stationsKey = "stations.json";
-
+    private static final String BUCKET_NAME = "bral.citibike.bbnn";
+    private static final String STATIONS_KEY = "stations.json";
     private S3Client s3Client;
     private CitiBikeService service;
     private final Gson gson;
@@ -30,10 +29,10 @@ public class StationsCache
     private Instant lastModified;
 
 
-    public StationsCache(S3Client s3Client)
+    public StationsCache(S3Client s3Client, CitiBikeService service)
     {
         this.s3Client = s3Client;
-        service = new CitiBikeServiceFactory().getService();
+        this.service = service;
         this.gson = new Gson();
     }
 
@@ -68,7 +67,7 @@ public class StationsCache
             {
                 // Case 3: If stations == null and S3’s lastModified date is LESS than 1 hour
                 stationObjects = readFromS3();
-                lastModified = Instant.now();
+                lastModified = getLastModifiedFromS3();
                 return stationObjects;
             } else {
                 // Case 4: If stations == null and S3’s lastModified date is GREATER than 1 hour
@@ -84,16 +83,12 @@ public class StationsCache
     private void uploadToS3(StationObjects stationObjects)
     {
         try {
-        String content = gson.toJson(stationObjects);
-        Region region = Region.US_EAST_2;
-        s3Client = S3Client.builder()
-                .region(region)
-                .build();
+            String content = gson.toJson(stationObjects);
 
-        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(stationsKey)
-                .build();
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(BUCKET_NAME)
+                    .key(STATIONS_KEY)
+                    .build();
 
             s3Client.putObject(putObjectRequest, RequestBody.fromString(content));
         } catch (Exception e) {
@@ -103,12 +98,10 @@ public class StationsCache
 
     private StationObjects readFromS3()
     {
-        s3Client = S3Client.create();
-
         GetObjectRequest getObjectRequest = GetObjectRequest
                 .builder()
-                .bucket(bucketName)
-                .key(stationsKey)
+                .bucket(BUCKET_NAME)
+                .key(STATIONS_KEY)
                 .build();
 
         InputStream in = s3Client.getObject(getObjectRequest);
@@ -121,8 +114,8 @@ public class StationsCache
     private boolean s3LastModifiedOverAnHour()
     {
         HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
-                .bucket(bucketName)
-                .key(stationsKey)
+                .bucket(BUCKET_NAME)
+                .key(STATIONS_KEY)
                 .build();
 
         try {
@@ -134,4 +127,20 @@ public class StationsCache
             return true;
         }
     }
+
+    private Instant getLastModifiedFromS3() {
+        HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
+                .bucket(BUCKET_NAME)
+                .key(STATIONS_KEY)
+                .build();
+
+        try {
+            HeadObjectResponse headObjectResponse = s3Client.headObject(headObjectRequest);
+            return headObjectResponse.lastModified();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Instant.EPOCH;
+        }
+    }
+
 }
