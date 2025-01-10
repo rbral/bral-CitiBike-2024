@@ -1,0 +1,4 @@
+curl -X POST \ -v \ -H "Content-Type: application/json" \ -d @request.json \ https://blw5eok2nolyyraol7a2hvvudy0mrnqg.lambda-url.us-east-2.on.aws/
+
+
+curl -X POST -v -H "Content-Type: application/json" -d @request.json https://blw5eok2nolyyraol7a2hvvudy0mrnqg.lambda-url.us-east-2.on.aws/

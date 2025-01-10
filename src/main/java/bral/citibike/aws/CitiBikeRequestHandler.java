@@ -8,9 +8,25 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.google.gson.Gson;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
 
 public class CitiBikeRequestHandler implements RequestHandler<APIGatewayProxyRequestEvent,
         CitiBikeRequestHandler.CitiBikeResponse> {
+
+    private final S3Client s3Client;
+    private final CitiBikeService service;
+    private final StationsCache stationsCache;
+
+    public CitiBikeRequestHandler()
+    {
+        // Initialize the s3 client
+        s3Client = S3Client.builder()
+                .region(Region.US_EAST_2)
+                .build();
+        service = new CitiBikeServiceFactory().getService();
+        this.stationsCache = new StationsCache(s3Client, service);
+    }
 
     @Override
     public CitiBikeResponse handleRequest(APIGatewayProxyRequestEvent event, Context context) {
@@ -18,11 +34,11 @@ public class CitiBikeRequestHandler implements RequestHandler<APIGatewayProxyReq
         Gson gson = new Gson();
         CitiBikeRequest request = gson.fromJson(body, CitiBikeRequest.class);
 
-        CitiBikeService service = new CitiBikeServiceFactory().getService();
-        StationObjects stations = service.getStationInformation().blockingGet();
         StatusObjects statuses = service.getStationStatus().blockingGet();
+        StationObjects stations = stationsCache.getStations();
 
         CitiBikeUtils utils = new CitiBikeUtils(stations, statuses);
+
         StationObject startStation = utils.closestStationWithBikes(request.from.lat, request.from.lon);
         StationObject endStation = utils.closestStationWithSlots(request.to.lat, request.to.lon);
 
@@ -35,14 +51,14 @@ public class CitiBikeRequestHandler implements RequestHandler<APIGatewayProxyReq
     }
 
 
-    record Coordinates(double lat, double lon) {}
+    public record Coordinates(double lat, double lon) {}
 
-    record CitiBikeRequest(
+    public record CitiBikeRequest(
             Coordinates from,
             Coordinates to
     ) { }
 
-    record StationInfo(
+    public record StationInfo(
             double lat,
             double lon,
             String name,
@@ -50,7 +66,7 @@ public class CitiBikeRequestHandler implements RequestHandler<APIGatewayProxyReq
             String station_id //CHECKSTYLE:ON
     ) { }
 
-    record CitiBikeResponse(
+    public record CitiBikeResponse(
             Coordinates from,
             StationInfo start,
             StationInfo end,
